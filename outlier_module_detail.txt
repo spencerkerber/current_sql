@@ -1,0 +1,130 @@
+SELECT
+'EM Utilization: ' + STR(em_utilization_module.val) as [module], 
+provider_roster.Provider, 
+provider_roster.Specialty,
+provider_roster.Region, 
+val_count as [Code Count], 
+proc_count, 
+IIF(val_count > 0, round(val_count/proc_count, 1), 0) as [val Rate], 
+round(count_sd_diff, 1),
+round(rate_sd_diff, 1),
+IIF(count_outlier = 'NA', '', count_outlier) as [Count Outlier], 
+IIF(rate_outlier = 'NA', '', rate_outlier) as [Rate Outlier],
+IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier)
+FROM provider_roster
+LEFT JOIN em_utilization_module ON provider_roster.NPI = em_utilization_module.npi
+WHERE 'EM Utilization' LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_module & '*' AND 
+provider_roster.Region LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_region AND 
+provider_roster.Market LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_market  
+AND val_count is not null AND IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) is not null
+
+UNION
+
+SELECT 'Modifier 25 Utilization' as [module], provider_roster.Provider, provider_roster.Specialty, provider_roster.Region, val_count, proc_count,val_count/proc_count as val_rate, round(count_sd_diff, 1),  round(rate_sd_diff, 1), IIF(count_outlier = 'NA', '', count_outlier) as [Count Outlier], IIF(rate_outlier = 'NA', '', rate_outlier) as [Rate Outlier], IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier)
+ 
+FROM  provider_roster
+LEFT JOIN modifier_25_module ON provider_roster.NPI = modifier_25_module.npi
+WHERE 'Modifier 25 Utilization' LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_module & '*' 
+AND val_count is not null AND IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) is not null AND provider_roster.Region LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_region AND 
+provider_roster.Market LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_market
+
+UNION 
+
+SELECT 'TCM Utilization' as [module], provider_roster.Provider, provider_roster.Specialty, provider_roster.Region, val_count, proc_count,val_count/proc_count as val_rate, round(count_sd_diff, 1),  round(rate_sd_diff, 1), IIF(count_outlier = 'NA', '', count_outlier) as [Count Outlier], IIF(rate_outlier = 'NA', '', rate_outlier) as [Rate Outlier], IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) 
+FROM  provider_roster
+LEFT JOIN tcm_utilization_module ON provider_roster.NPI = tcm_utilization_module.npi
+WHERE 'TCM Utilization' LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_module & '*'
+AND val_count is not null AND IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) is not null AND provider_roster.Region LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_region AND 
+provider_roster.Market LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_market
+
+UNION
+
+SELECT 'CCM Utilization' as [module], provider_roster.Provider, provider_roster.Specialty, provider_roster.Region, val_count, proc_count,val_count/proc_count as val_rate, round(count_sd_diff, 1),  round(rate_sd_diff, 1), IIF(count_outlier = 'NA', '', count_outlier) as [Count Outlier], IIF(rate_outlier = 'NA', '', rate_outlier) as [Rate Outlier], IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) 
+FROM provider_roster
+LEFT JOIN ccm_utilization_module ON provider_roster.NPI = ccm_utilization_module.npi
+WHERE 'CCM Utilization' LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_module & '*' 
+AND val_count is not null AND IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) is not null AND provider_roster.Region LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_region AND 
+provider_roster.Market LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_market
+
+UNION 
+
+SELECT 'Anesthesia Modifier Utilization' as [module], provider_roster.Provider, provider_roster.Specialty, provider_roster.Region, val_count, proc_count, val_count/proc_count as val_rate, round(count_sd_diff, 1),  round(rate_sd_diff, 1), IIF(count_outlier = 'NA', '', count_outlier) as [Count Outlier], IIF(rate_outlier = 'NA', '', rate_outlier) as [Rate Outlier], IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier)
+FROM provider_roster
+LEFT JOIN anesthesia_modifiers_module ON provider_roster.NPI = anesthesia_modifiers_module.npi
+WHERE 'Anesthesia Modifier Utilization' LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_module & '*' 
+AND val_count is not null AND IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) is not null AND provider_roster.Region LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_region AND 
+provider_roster.Market LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_market
+
+
+UNION 
+
+SELECT 'Modifier JW Utilization' as [module],provider_roster.Provider, provider_roster.Specialty, provider_roster.Region, val_count, proc_count,val_count/proc_count as val_rate, round(count_sd_diff, 1),  round(rate_sd_diff, 1), IIF(count_outlier = 'NA', '', count_outlier) as [Count Outlier], IIF(rate_outlier = 'NA', '', rate_outlier) as [Rate Outlier], IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) 
+FROM  provider_roster
+LEFT JOIN modifier_jw_module ON provider_roster.NPI =  modifier_jw_module.npi
+WHERE 'Modifier JW Utilization' LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_module & '*'
+AND val_count is not null AND IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) is not null AND provider_roster.Region LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_region AND 
+provider_roster.Market LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_market
+
+UNION 
+
+SELECT 'Modifier KX Utilization' as [module], provider_roster.Provider, provider_roster.Specialty, provider_roster.Region, val_count, proc_count, val_count/proc_count as val_rate, round(count_sd_diff, 1),  round(rate_sd_diff, 1), IIF(count_outlier = 'NA', '', count_outlier) as [Count Outlier], IIF(rate_outlier = 'NA', '', rate_outlier) as [Rate Outlier], IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) 
+FROM  provider_roster
+LEFT JOIN modifier_kx_module ON provider_roster.NPI =  modifier_kx_module.npi
+WHERE 'Modifier KX Utilization' LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_module & '*'
+AND val_count is not null AND IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) is not null AND provider_roster.Region LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_region AND 
+provider_roster.Market LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_market
+
+
+UNION 
+
+SELECT 'Home Visit Utilizations' as [module], provider_roster.Provider, provider_roster.Specialty, provider_roster.Region, val_count, proc_count,val_count/proc_count as val_rate, round(count_sd_diff, 1),  round(rate_sd_diff, 1), IIF(count_outlier = 'NA', '', count_outlier) as [Count Outlier], IIF(rate_outlier = 'NA', '', rate_outlier) as [Rate Outlier], IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) 
+FROM  provider_roster
+LEFT JOIN home_visits_module ON provider_roster.NPI = home_visits_module.npi
+WHERE 'Home Visit Utilizations' LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_module & '*' 
+AND val_count is not null AND IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) is not null AND provider_roster.Region LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_region AND 
+provider_roster.Market LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_market
+
+
+UNION 
+
+SELECT 'Prolonged Services Utilization' as [module],provider_roster.Provider, provider_roster.Specialty, provider_roster.Region, val_count, proc_count, val_count/proc_count as val_rate, round(count_sd_diff, 1),  round(rate_sd_diff, 1), IIF(count_outlier = 'NA', '', count_outlier) as [Count Outlier], IIF(rate_outlier = 'NA', '', rate_outlier) as [Rate Outlier], IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) 
+FROM  provider_roster
+LEFT JOIN prolonged_services_module ON provider_roster.NPI = prolonged_services_module.npi
+WHERE 'Prolonged Services Utilization' LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_module & '*' 
+AND val_count is not null AND IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) is not null AND provider_roster.Region LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_region AND 
+provider_roster.Market LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_market
+
+
+UNION 
+
+SELECT 'Physical Therapy Utilization' as [module], provider_roster.Provider, provider_roster.Specialty, provider_roster.Region, val_count, proc_count, val_count/proc_count as val_rate, round(count_sd_diff, 1),  round(rate_sd_diff, 1), IIF(count_outlier = 'NA', '', count_outlier) as [Count Outlier], IIF(rate_outlier = 'NA', '', rate_outlier) as [Rate Outlier], IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) 
+FROM  provider_roster
+LEFT JOIN physical_therapy_module ON provider_roster.NPI = physical_therapy_module.npi
+WHERE 'Physical Therapy Utilization' LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_module & '*' 
+AND val_count is not null AND IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) is not null AND provider_roster.Region LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_region AND 
+provider_roster.Market LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_market
+
+UNION 
+
+SELECT 'Sleep Study Utilization' as [module], provider_roster.Provider, provider_roster.Specialty, provider_roster.Region, val_count, proc_count, val_count/proc_count as val_rate, round(count_sd_diff, 1),  round(rate_sd_diff, 1), IIF(count_outlier = 'NA', '', count_outlier) as [Count Outlier], IIF(rate_outlier = 'NA', '', rate_outlier) as [Rate Outlier], IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) 
+FROM  provider_roster
+LEFT JOIN sleep_studies_module ON provider_roster.NPI = sleep_studies_module.npi
+WHERE 'Sleep Study Utilization' LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_module & '*' 
+AND val_count is not null AND IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) is not null AND provider_roster.Region LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_region AND 
+provider_roster.Market LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_market
+
+UNION 
+
+SELECT 'Subsequent Visits' as [module], provider_roster.Provider, provider_roster.Specialty, provider_roster.Region, val_count, proc_count, val_rate, round(count_sd_diff, 1),  round(rate_sd_diff, 1), IIF(count_outlier = 'NA', '', count_outlier) as [Count Outlier], IIF(rate_outlier = 'NA', '', rate_outlier) as [Rate Outlier], IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) 
+FROM  provider_roster
+LEFT JOIN subsequent_visits_module ON provider_roster.NPI = subsequent_visits_module.npi
+WHERE 'Subsequent Visits' LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_module & '*' 
+AND val_count is not null AND IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) is not null AND provider_roster.Region LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_region AND 
+provider_roster.Market LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_market
+
+UNION SELECT 'CERT Focus: ' + STR(cert_focus_module.val) as [module], provider_roster.Provider, provider_roster.Specialty,provider_roster.Region, val_count as [Code Count], proc_count, IIF(val_count > 0, round(val_count/proc_count, 1), 0) as [val Rate], round(count_sd_diff, 1),round(rate_sd_diff, 1),IIF(count_outlier = 'NA', '', count_outlier) as [Count Outlier], IIF(rate_outlier = 'NA', '', rate_outlier) as [Rate Outlier], IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier)
+FROM provider_roster
+LEFT JOIN cert_focus_module ON provider_roster.NPI = cert_focus_module.npi
+WHERE 'CERT Focus' LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_module & '*'
+AND val_count is not null AND IIF([Forms]![Navigation Form]![NavigationSubform].Form!module_outlier_check, IIF(outlier = -1, outlier, Null), outlier) is not null AND provider_roster.Region LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_region AND 
+provider_roster.Market LIKE '*' & [Forms]![Navigation Form]![NavigationSubform].Form!outlier_market;

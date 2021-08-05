@@ -1,0 +1,37 @@
+SELECT 
+	provider_roster.Region, 
+	IIF(MONTH(contacts.Contact_Date) < 9, 
+		"FY"&YEAR(contacts.Contact_Date)&"Q"&IIF(MONTH(contacts.Contact_Date) < 3, 2, IIF(MONTH(contacts.Contact_Date) < 6, 3, IIF(MONTH(contacts.Contact_Date) < 9, 4, IIF(MONTH(contacts.Contact_Date) < 12, 1, 2)))),
+		"FY"&YEAR(contacts.Contact_Date) + 1&"Q"&IIF(MONTH(contacts.Contact_Date) < 3, 2, IIF(MONTH(contacts.Contact_Date) < 6, 3, IIF(MONTH(contacts.Contact_Date) < 9, 4, IIF(MONTH(contacts.Contact_Date) < 12, 1, 2))))) as [Fiscal Quarter],
+	contacts.Auditor, 
+	COUNT(contacts.Contact_Date) AS Contacts
+	FROM contacts 
+	INNER JOIN provider_roster 
+	ON contacts.Provider = provider_roster.Provider
+	GROUP BY provider_roster.Region, IIF(MONTH(contacts.Contact_Date) < 9, "FY"&YEAR(contacts.Contact_Date)&"Q"&IIF(MONTH(contacts.Contact_Date) < 3, 2, IIF(MONTH(contacts.Contact_Date) < 6, 3, IIF(MONTH(contacts.Contact_Date) < 9, 4, IIF(MONTH(contacts.Contact_Date) < 12, 1, 2)))),"FY"&YEAR(contacts.Contact_Date) + 1&"Q"&IIF(MONTH(contacts.Contact_Date) < 3, 2, IIF(MONTH(contacts.Contact_Date) < 6, 3, IIF(MONTH(contacts.Contact_Date) < 9, 4, IIF(MONTH(contacts.Contact_Date) < 12, 1, 2))))), contacts.Auditor
+		
+	UNION
+
+	SELECT 
+	provider_roster.Region, 
+	IIF(MONTH(contacts.Contact_Date) < 9, 
+		"FY"&YEAR(contacts.Contact_Date)&"Q"&IIF(MONTH(contacts.Contact_Date) < 3, 2, IIF(MONTH(contacts.Contact_Date) < 6, 3, IIF(MONTH(contacts.Contact_Date) < 9, 4, IIF(MONTH(contacts.Contact_Date) < 12, 1, 2)))),
+		"FY"&YEAR(contacts.Contact_Date) + 1&"Q"&IIF(MONTH(contacts.Contact_Date) < 3, 2, IIF(MONTH(contacts.Contact_Date) < 6, 3, IIF(MONTH(contacts.Contact_Date) < 9, 4, IIF(MONTH(contacts.Contact_Date) < 12, 1, 2))))) as [Fiscal Quarter],
+	"" as Auditor,
+	COUNT(contacts.Contact_Date) AS Contacts
+	FROM contacts 
+	INNER JOIN provider_roster 
+	ON contacts.Provider = provider_roster.Provider
+	GROUP BY provider_roster.Region, IIF(MONTH(contacts.Contact_Date) < 9, "FY"&YEAR(contacts.Contact_Date)&"Q"&IIF(MONTH(contacts.Contact_Date) < 3, 2, IIF(MONTH(contacts.Contact_Date) < 6, 3, IIF(MONTH(contacts.Contact_Date) < 9, 4, IIF(MONTH(contacts.Contact_Date) < 12, 1, 2)))),"FY"&YEAR(contacts.Contact_Date) + 1&"Q"&IIF(MONTH(contacts.Contact_Date) < 3, 2, IIF(MONTH(contacts.Contact_Date) < 6, 3, IIF(MONTH(contacts.Contact_Date) < 9, 4, IIF(MONTH(contacts.Contact_Date) < 12, 1, 2)))))
+	
+	UNION SELECT 
+	"" as Region,
+	IIF(MONTH(contacts.Contact_Date) < 9, 
+		"FY"&YEAR(contacts.Contact_Date)&"Q"&IIF(MONTH(contacts.Contact_Date) < 3, 2, IIF(MONTH(contacts.Contact_Date) < 6, 3, IIF(MONTH(contacts.Contact_Date) < 9, 4, IIF(MONTH(contacts.Contact_Date) < 12, 1, 2)))),
+		"FY"&YEAR(contacts.Contact_Date) + 1&"Q"&IIF(MONTH(contacts.Contact_Date) < 3, 2, IIF(MONTH(contacts.Contact_Date) < 6, 3, IIF(MONTH(contacts.Contact_Date) < 9, 4, IIF(MONTH(contacts.Contact_Date) < 12, 1, 2))))) as [Fiscal Quarter],
+	"" as Auditor,
+	COUNT(contacts.Contact_Date) AS Contacts
+	FROM contacts 
+	INNER JOIN provider_roster 
+	ON contacts.Provider = provider_roster.Provider
+	GROUP BY IIF(MONTH(contacts.Contact_Date) < 9, "FY"&YEAR(contacts.Contact_Date)&"Q"&IIF(MONTH(contacts.Contact_Date) < 3, 2, IIF(MONTH(contacts.Contact_Date) < 6, 3, IIF(MONTH(contacts.Contact_Date) < 9, 4, IIF(MONTH(contacts.Contact_Date) < 12, 1, 2)))),"FY"&YEAR(contacts.Contact_Date) + 1&"Q"&IIF(MONTH(contacts.Contact_Date) < 3, 2, IIF(MONTH(contacts.Contact_Date) < 6, 3, IIF(MONTH(contacts.Contact_Date) < 9, 4, IIF(MONTH(contacts.Contact_Date) < 12, 1, 2)))));

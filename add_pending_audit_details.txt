@@ -1,0 +1,1025 @@
+INSERT INTO pending_audit_details ( [Audit ID], Provider, [Place of Service], [Audit Type], [Patient ID], [Date of Audit], [Reported Code], [Value Reported $], [Audited Code], [Value Audited $], Variance, Overcharge, Undercharge, [Code Type] )
+SELECT tmp.[Audit ID], tmp.Provider, tmp.[Place of Service], tmp.[Audit Type], tmp.[Patient ID], tmp.[Date of Audit], tmp.[Reported Code], Val(IIF(tmp.[Value Reported $] is null, 0, tmp.[Value Reported $])) AS [Value Reported $], tmp.[Audited Code], Val(IIF(tmp.[Value Audited $] is null, 0, tmp.[Value Audited $])) AS [Value Audited $], Abs(Val(IIF(tmp.[Value Reported $] is null, 0, tmp.[Value Reported $])) - Val(IIF(tmp.[Value Audited $] is null, 0, tmp.[Value Audited $]))) AS Variance, IIF(Val(IIF(tmp.[Value Reported $] is null, 0, tmp.[Value Reported $])) > Val(IIF(tmp.[Value Audited $] is null, 0, tmp.[Value Audited $])), Abs(Val(IIF(tmp.[Value Reported $] is null, 0, tmp.[Value Reported $])) - Val(IIF(tmp.[Value Audited $] is null, 0, tmp.[Value Audited $]))), 0) AS overcharge, IIF(Val(IIF(tmp.[Value Audited $] is null, 0, tmp.[Value Audited $])) > Val(IIF(tmp.[Value Reported $] is null, 0, tmp.[Value Reported $])), Abs(Val(IIF(tmp.[Value Reported $] is null, 0, tmp.[Value Reported $])) - Val(IIF(tmp.[Value Audited $] is null, 0, tmp.[Value Audited $]))), 0) AS undercharge, tmp.[Code Type]
+FROM ((SELECT 
+am.[Audit ID] AS [Audit ID], 
+provider_roster.Provider,
+IIF(am.[Non Facility] is not null, 0, -1) as [Place of Service],
+"Routine" as [Audit Type],
+am.[Patient ID],
+DateValue(left(am.[Completed Date],10)) as [Date of Audit],
+am.[Reported CPT] as [Reported Code],
+am.[Value of Reported Total $] as [Value Reported $],
+am.[Audited CPT] as [Audited Code],
+am.[Value of Audited Total $] as [Value Audited $],
+IIF(am.[Correct EM] is not null OR am.[Overcoded EM] is not null OR am.[Undercoded em] is not null, "E/M", "Procedure") as [Code Type]
+FROM (SELECT tmp.[Audit ID], tmp.NPI, tmp.[Provider Last_Name], tmp.Provider_First_Name, tmp.Region, tmp.Practice, tmp.Specialty, tmp.[Patient Name], tmp.[Patient ID], tmp.DOS, tmp.[Completed Date], TRIM(tmp.[Reported CPT]) as [Reported CPT], TRIM(tmp.[Audited CPT]) as [Audited CPT], tmp.[EM Level], tmp.HX, tmp.EX, tmp.MDM, tmp.[Level +/- _Difference], tmp.[Reported ICD], tmp.[Audited ICD], tmp.[ICD-10 Clinical_Documentation], tmp.[Correct EM], tmp.[Overcoded EM], tmp.[Undercoded em], tmp.[Correct Procedures], tmp.[Incorrect Procedures], tmp.[Additional Procedures], tmp.[Correct ICD], tmp.[Incorrect ICD], tmp.[Additional ICD], tmp.[Supports ICD10], tmp.[Does not Support ICD], tmp.Comments, tmp.[Additional Data], tmp.Payer, tmp.POS, tmp.Facility, tmp.[Non Facility], tmp.[Value of Reported wRVU], tmp.[Value of Audited wRVU], tmp.[Difference (wRVU)], tmp.[Value of Reported Total RVU], tmp.[Value of Audited Total RVU], tmp.[Difference (Total RVU)], tmp.[Value of Reported Total $], tmp.[Value of Audited Total $], tmp.[Variance (dollars)]
+FROM (SELECT bard_auditmanager.[Audit ID], bard_auditmanager.NPI, bard_auditmanager.[Provider Last_Name], bard_auditmanager.Provider_First_Name, bard_auditmanager.Region, bard_auditmanager.Practice, bard_auditmanager.Specialty, bard_auditmanager.[Patient Name], bard_auditmanager.[Patient ID], bard_auditmanager.DOS, bard_auditmanager.[Completed Date], bard_auditmanager.[Reported CPT], bard_auditmanager.[Audited CPT], bard_auditmanager.[EM Level], bard_auditmanager.HX, bard_auditmanager.EX, bard_auditmanager.MDM, bard_auditmanager.[Level +/- _Difference], bard_auditmanager.[Reported ICD], bard_auditmanager.[Audited ICD], bard_auditmanager.[ICD-10 Clinical_Documentation], bard_auditmanager.[Correct EM], bard_auditmanager.[Overcoded EM], bard_auditmanager.[Undercoded em], bard_auditmanager.[Correct Procedures], bard_auditmanager.[Incorrect Procedures], bard_auditmanager.[Additional Procedures], bard_auditmanager.[Correct ICD], bard_auditmanager.[Incorrect ICD], bard_auditmanager.[Additional ICD], bard_auditmanager.[Supports ICD10], bard_auditmanager.[Does not Support ICD], bard_auditmanager.Comments, bard_auditmanager.[Additional Data], bard_auditmanager.Payer, bard_auditmanager.POS, bard_auditmanager.Facility, bard_auditmanager.[Non Facility], bard_auditmanager.[Value of Reported wRVU], bard_auditmanager.[Value of Audited wRVU], bard_auditmanager.[Difference (wRVU)], bard_auditmanager.[Value of Reported Total RVU], bard_auditmanager.[Value of Audited Total RVU], bard_auditmanager.[Difference (Total RVU)], bard_auditmanager.[Value of Reported Total $], bard_auditmanager.[Value of Audited Total $], bard_auditmanager.[Variance (dollars)]
+	FROM bard_auditmanager WHERE NPI is not null
+
+	UNION ALL
+
+	SELECT brooks_auditmanager.[Audit ID], brooks_auditmanager.NPI, brooks_auditmanager.[Provider Last_Name], brooks_auditmanager.Provider_First_Name, brooks_auditmanager.Region, brooks_auditmanager.Practice, brooks_auditmanager.Specialty, brooks_auditmanager.[Patient Name], brooks_auditmanager.[Patient ID], brooks_auditmanager.DOS, brooks_auditmanager.[Completed Date], brooks_auditmanager.[Reported CPT], brooks_auditmanager.[Audited CPT], brooks_auditmanager.[EM Level], brooks_auditmanager.HX, brooks_auditmanager.EX, brooks_auditmanager.MDM, brooks_auditmanager.[Level +/- _Difference], brooks_auditmanager.[Reported ICD], brooks_auditmanager.[Audited ICD], brooks_auditmanager.[ICD-10 Clinical_Documentation], brooks_auditmanager.[Correct EM], brooks_auditmanager.[Overcoded EM], brooks_auditmanager.[Undercoded em], brooks_auditmanager.[Correct Procedures], brooks_auditmanager.[Incorrect Procedures], brooks_auditmanager.[Additional Procedures], brooks_auditmanager.[Correct ICD], brooks_auditmanager.[Incorrect ICD], brooks_auditmanager.[Additional ICD], brooks_auditmanager.[Supports ICD10], brooks_auditmanager.[Does not Support ICD], brooks_auditmanager.Comments, brooks_auditmanager.[Additional Data], brooks_auditmanager.Payer, brooks_auditmanager.POS, brooks_auditmanager.Facility, brooks_auditmanager.[Non Facility], brooks_auditmanager.[Value of Reported wRVU], brooks_auditmanager.[Value of Audited wRVU], brooks_auditmanager.[Difference (wRVU)], brooks_auditmanager.[Value of Reported Total RVU], brooks_auditmanager.[Value of Audited Total RVU], brooks_auditmanager.[Difference (Total RVU)], brooks_auditmanager.[Value of Reported Total $], brooks_auditmanager.[Value of Audited Total $], brooks_auditmanager.[Variance (dollars)]
+	FROM brooks_auditmanager WHERE NPI is not null
+	
+	UNION ALL
+	
+SELECT hannah_auditmanager.[Audit ID], hannah_auditmanager.NPI, hannah_auditmanager.[Provider Last_Name], hannah_auditmanager.Provider_First_Name, hannah_auditmanager.Region, hannah_auditmanager.Practice, hannah_auditmanager.Specialty, hannah_auditmanager.[Patient Name], hannah_auditmanager.[Patient ID], hannah_auditmanager.DOS, hannah_auditmanager.[Completed Date], hannah_auditmanager.[Reported CPT], hannah_auditmanager.[Audited CPT], hannah_auditmanager.[EM Level], hannah_auditmanager.HX, hannah_auditmanager.EX, hannah_auditmanager.MDM, hannah_auditmanager.[Level +/- _Difference], hannah_auditmanager.[Reported ICD], hannah_auditmanager.[Audited ICD], hannah_auditmanager.[ICD-10 Clinical_Documentation], hannah_auditmanager.[Correct EM], hannah_auditmanager.[Overcoded EM], hannah_auditmanager.[Undercoded em], hannah_auditmanager.[Correct Procedures], hannah_auditmanager.[Incorrect Procedures], hannah_auditmanager.[Additional Procedures], hannah_auditmanager.[Correct ICD], hannah_auditmanager.[Incorrect ICD], hannah_auditmanager.[Additional ICD], hannah_auditmanager.[Supports ICD10], hannah_auditmanager.[Does not Support ICD], hannah_auditmanager.Comments, hannah_auditmanager.[Additional Data], hannah_auditmanager.Payer, hannah_auditmanager.POS, hannah_auditmanager.Facility, hannah_auditmanager.[Non Facility], hannah_auditmanager.[Value of Reported wRVU], hannah_auditmanager.[Value of Audited wRVU], hannah_auditmanager.[Difference (wRVU)], hannah_auditmanager.[Value of Reported Total RVU], hannah_auditmanager.[Value of Audited Total RVU], hannah_auditmanager.[Difference (Total RVU)], hannah_auditmanager.[Value of Reported Total $], hannah_auditmanager.[Value of Audited Total $], hannah_auditmanager.[Variance (dollars)]
+	FROM hannah_auditmanager WHERE NPI is not null
+	
+	UNION ALL
+	
+	SELECT thomas_auditmanager.[Audit ID], thomas_auditmanager.NPI, thomas_auditmanager.[Provider Last_Name], thomas_auditmanager.Provider_First_Name, thomas_auditmanager.Region, thomas_auditmanager.Practice, thomas_auditmanager.Specialty, thomas_auditmanager.[Patient Name], thomas_auditmanager.[Patient ID], thomas_auditmanager.DOS, thomas_auditmanager.[Completed Date], thomas_auditmanager.[Reported CPT], thomas_auditmanager.[Audited CPT], thomas_auditmanager.[EM Level], thomas_auditmanager.HX, thomas_auditmanager.EX, thomas_auditmanager.MDM, thomas_auditmanager.[Level +/- _Difference], thomas_auditmanager.[Reported ICD], thomas_auditmanager.[Audited ICD], thomas_auditmanager.[ICD-10 Clinical_Documentation], thomas_auditmanager.[Correct EM], thomas_auditmanager.[Overcoded EM], thomas_auditmanager.[Undercoded em], thomas_auditmanager.[Correct Procedures], thomas_auditmanager.[Incorrect Procedures], thomas_auditmanager.[Additional Procedures], thomas_auditmanager.[Correct ICD], thomas_auditmanager.[Incorrect ICD], thomas_auditmanager.[Additional ICD], thomas_auditmanager.[Supports ICD10], thomas_auditmanager.[Does not Support ICD], thomas_auditmanager.Comments, thomas_auditmanager.[Additional Data], thomas_auditmanager.Payer, thomas_auditmanager.POS, thomas_auditmanager.Facility, thomas_auditmanager.[Non Facility], thomas_auditmanager.[Value of Reported wRVU], thomas_auditmanager.[Value of Audited wRVU], thomas_auditmanager.[Difference (wRVU)], thomas_auditmanager.[Value of Reported Total RVU], thomas_auditmanager.[Value of Audited Total RVU], thomas_auditmanager.[Difference (Total RVU)], thomas_auditmanager.[Value of Reported Total $], thomas_auditmanager.[Value of Audited Total $], thomas_auditmanager.[Variance (dollars)]
+	FROM thomas_auditmanager WHERE NPI is not null
+
+	UNION ALL
+
+	SELECT azra_auditmanager.[Audit ID], azra_auditmanager.NPI, azra_auditmanager.[Provider Last_Name], azra_auditmanager.Provider_First_Name, azra_auditmanager.Region, azra_auditmanager.Practice, azra_auditmanager.Specialty, azra_auditmanager.[Patient Name], azra_auditmanager.[Patient ID], azra_auditmanager.DOS, azra_auditmanager.[Completed Date], azra_auditmanager.[Reported CPT], azra_auditmanager.[Audited CPT], azra_auditmanager.[EM Level], azra_auditmanager.HX, azra_auditmanager.EX, azra_auditmanager.MDM, azra_auditmanager.[Level +/- _Difference], azra_auditmanager.[Reported ICD], azra_auditmanager.[Audited ICD], azra_auditmanager.[ICD-10 Clinical_Documentation], azra_auditmanager.[Correct EM], azra_auditmanager.[Overcoded EM], azra_auditmanager.[Undercoded em], azra_auditmanager.[Correct Procedures], azra_auditmanager.[Incorrect Procedures], azra_auditmanager.[Additional Procedures], azra_auditmanager.[Correct ICD], azra_auditmanager.[Incorrect ICD], azra_auditmanager.[Additional ICD], azra_auditmanager.[Supports ICD10], azra_auditmanager.[Does not Support ICD], azra_auditmanager.Comments, azra_auditmanager.[Additional Data], azra_auditmanager.Payer, azra_auditmanager.POS, azra_auditmanager.Facility, azra_auditmanager.[Non Facility], azra_auditmanager.[Value of Reported wRVU], azra_auditmanager.[Value of Audited wRVU], azra_auditmanager.[Difference (wRVU)], azra_auditmanager.[Value of Reported Total RVU], azra_auditmanager.[Value of Audited Total RVU], azra_auditmanager.[Difference (Total RVU)], azra_auditmanager.[Value of Reported Total $], azra_auditmanager.[Value of Audited Total $], azra_auditmanager.[Variance (dollars)]
+	FROM azra_auditmanager WHERE NPI is not null
+
+	UNION ALL
+
+	SELECT gillum_auditmanager.[Audit ID], gillum_auditmanager.NPI, gillum_auditmanager.[Provider Last_Name], gillum_auditmanager.Provider_First_Name, gillum_auditmanager.Region, gillum_auditmanager.Practice, gillum_auditmanager.Specialty, gillum_auditmanager.[Patient Name], gillum_auditmanager.[Patient ID], gillum_auditmanager.DOS, gillum_auditmanager.[Completed Date], gillum_auditmanager.[Reported CPT], gillum_auditmanager.[Audited CPT], gillum_auditmanager.[EM Level], gillum_auditmanager.HX, gillum_auditmanager.EX, gillum_auditmanager.MDM, gillum_auditmanager.[Level +/- _Difference], gillum_auditmanager.[Reported ICD], gillum_auditmanager.[Audited ICD], gillum_auditmanager.[ICD-10 Clinical_Documentation], gillum_auditmanager.[Correct EM], gillum_auditmanager.[Overcoded EM], gillum_auditmanager.[Undercoded em], gillum_auditmanager.[Correct Procedures], gillum_auditmanager.[Incorrect Procedures], gillum_auditmanager.[Additional Procedures], gillum_auditmanager.[Correct ICD], gillum_auditmanager.[Incorrect ICD], gillum_auditmanager.[Additional ICD], gillum_auditmanager.[Supports ICD10], gillum_auditmanager.[Does not Support ICD], gillum_auditmanager.Comments, gillum_auditmanager.[Additional Data], gillum_auditmanager.Payer, gillum_auditmanager.POS, gillum_auditmanager.Facility, gillum_auditmanager.[Non Facility], gillum_auditmanager.[Value of Reported wRVU], gillum_auditmanager.[Value of Audited wRVU], gillum_auditmanager.[Difference (wRVU)], gillum_auditmanager.[Value of Reported Total RVU], gillum_auditmanager.[Value of Audited Total RVU], gillum_auditmanager.[Difference (Total RVU)], gillum_auditmanager.[Value of Reported Total $], gillum_auditmanager.[Value of Audited Total $], gillum_auditmanager.[Variance (dollars)]
+	FROM gillum_auditmanager WHERE NPI is not null
+
+	UNION ALL
+
+	SELECT mcguire_auditmanager.[Audit ID], mcguire_auditmanager.NPI, mcguire_auditmanager.[Provider Last_Name], mcguire_auditmanager.Provider_First_Name, mcguire_auditmanager.Region, mcguire_auditmanager.Practice, mcguire_auditmanager.Specialty, mcguire_auditmanager.[Patient Name], mcguire_auditmanager.[Patient ID], mcguire_auditmanager.DOS, mcguire_auditmanager.[Completed Date], mcguire_auditmanager.[Reported CPT], mcguire_auditmanager.[Audited CPT], mcguire_auditmanager.[EM Level], mcguire_auditmanager.HX, mcguire_auditmanager.EX, mcguire_auditmanager.MDM, mcguire_auditmanager.[Level +/- _Difference], mcguire_auditmanager.[Reported ICD], mcguire_auditmanager.[Audited ICD], mcguire_auditmanager.[ICD-10 Clinical_Documentation], mcguire_auditmanager.[Correct EM], mcguire_auditmanager.[Overcoded EM], mcguire_auditmanager.[Undercoded em], mcguire_auditmanager.[Correct Procedures], mcguire_auditmanager.[Incorrect Procedures], mcguire_auditmanager.[Additional Procedures], mcguire_auditmanager.[Correct ICD], mcguire_auditmanager.[Incorrect ICD], mcguire_auditmanager.[Additional ICD], mcguire_auditmanager.[Supports ICD10], mcguire_auditmanager.[Does not Support ICD], mcguire_auditmanager.Comments, mcguire_auditmanager.[Additional Data], mcguire_auditmanager.Payer, mcguire_auditmanager.POS, mcguire_auditmanager.Facility, mcguire_auditmanager.[Non Facility], mcguire_auditmanager.[Value of Reported wRVU], mcguire_auditmanager.[Value of Audited wRVU], mcguire_auditmanager.[Difference (wRVU)], mcguire_auditmanager.[Value of Reported Total RVU], mcguire_auditmanager.[Value of Audited Total RVU], mcguire_auditmanager.[Difference (Total RVU)], mcguire_auditmanager.[Value of Reported Total $], mcguire_auditmanager.[Value of Audited Total $], mcguire_auditmanager.[Variance (dollars)]
+	FROM mcguire_auditmanager WHERE NPI is not null
+
+	UNION ALL
+
+	SELECT perkins_auditmanager.[Audit ID], perkins_auditmanager.NPI, perkins_auditmanager.[Provider Last_Name], perkins_auditmanager.Provider_First_Name, perkins_auditmanager.Region, perkins_auditmanager.Practice, perkins_auditmanager.Specialty, perkins_auditmanager.[Patient Name], perkins_auditmanager.[Patient ID], perkins_auditmanager.DOS, perkins_auditmanager.[Completed Date], perkins_auditmanager.[Reported CPT], perkins_auditmanager.[Audited CPT], perkins_auditmanager.[EM Level], perkins_auditmanager.HX, perkins_auditmanager.EX, perkins_auditmanager.MDM, perkins_auditmanager.[Level +/- _Difference], perkins_auditmanager.[Reported ICD], perkins_auditmanager.[Audited ICD], perkins_auditmanager.[ICD-10 Clinical_Documentation], perkins_auditmanager.[Correct EM], perkins_auditmanager.[Overcoded EM], perkins_auditmanager.[Undercoded em], perkins_auditmanager.[Correct Procedures], perkins_auditmanager.[Incorrect Procedures], perkins_auditmanager.[Additional Procedures], perkins_auditmanager.[Correct ICD], perkins_auditmanager.[Incorrect ICD], perkins_auditmanager.[Additional ICD], perkins_auditmanager.[Supports ICD10], perkins_auditmanager.[Does not Support ICD], perkins_auditmanager.Comments, perkins_auditmanager.[Additional Data], perkins_auditmanager.Payer, perkins_auditmanager.POS, perkins_auditmanager.Facility, perkins_auditmanager.[Non Facility], perkins_auditmanager.[Value of Reported wRVU], perkins_auditmanager.[Value of Audited wRVU], perkins_auditmanager.[Difference (wRVU)], perkins_auditmanager.[Value of Reported Total RVU], perkins_auditmanager.[Value of Audited Total RVU], perkins_auditmanager.[Difference (Total RVU)], perkins_auditmanager.[Value of Reported Total $], perkins_auditmanager.[Value of Audited Total $], perkins_auditmanager.[Variance (dollars)]
+	FROM perkins_auditmanager WHERE NPI is not null
+
+	UNION ALL
+
+	SELECT pruitt_auditmanager.[Audit ID], pruitt_auditmanager.NPI, pruitt_auditmanager.[Provider Last_Name], pruitt_auditmanager.Provider_First_Name, pruitt_auditmanager.Region, pruitt_auditmanager.Practice, pruitt_auditmanager.Specialty, pruitt_auditmanager.[Patient Name], pruitt_auditmanager.[Patient ID], pruitt_auditmanager.DOS, pruitt_auditmanager.[Completed Date], pruitt_auditmanager.[Reported CPT], pruitt_auditmanager.[Audited CPT], pruitt_auditmanager.[EM Level], pruitt_auditmanager.HX, pruitt_auditmanager.EX, pruitt_auditmanager.MDM, pruitt_auditmanager.[Level +/- _Difference], pruitt_auditmanager.[Reported ICD], pruitt_auditmanager.[Audited ICD], pruitt_auditmanager.[ICD-10 Clinical_Documentation], pruitt_auditmanager.[Correct EM], pruitt_auditmanager.[Overcoded EM], pruitt_auditmanager.[Undercoded em], pruitt_auditmanager.[Correct Procedures], pruitt_auditmanager.[Incorrect Procedures], pruitt_auditmanager.[Additional Procedures], pruitt_auditmanager.[Correct ICD], pruitt_auditmanager.[Incorrect ICD], pruitt_auditmanager.[Additional ICD], pruitt_auditmanager.[Supports ICD10], pruitt_auditmanager.[Does not Support ICD], pruitt_auditmanager.Comments, pruitt_auditmanager.[Additional Data], pruitt_auditmanager.Payer, pruitt_auditmanager.POS, pruitt_auditmanager.Facility, pruitt_auditmanager.[Non Facility], pruitt_auditmanager.[Value of Reported wRVU], pruitt_auditmanager.[Value of Audited wRVU], pruitt_auditmanager.[Difference (wRVU)], pruitt_auditmanager.[Value of Reported Total RVU], pruitt_auditmanager.[Value of Audited Total RVU], pruitt_auditmanager.[Difference (Total RVU)], pruitt_auditmanager.[Value of Reported Total $], pruitt_auditmanager.[Value of Audited Total $], pruitt_auditmanager.[Variance (dollars)]
+	FROM pruitt_auditmanager WHERE NPI is not null
+
+	UNION ALL
+
+	SELECT renda_auditmanager.[Audit ID], renda_auditmanager.NPI, renda_auditmanager.[Provider Last_Name], renda_auditmanager.Provider_First_Name, renda_auditmanager.Region, renda_auditmanager.Practice, renda_auditmanager.Specialty, renda_auditmanager.[Patient Name], renda_auditmanager.[Patient ID], renda_auditmanager.DOS, renda_auditmanager.[Completed Date], renda_auditmanager.[Reported CPT], renda_auditmanager.[Audited CPT], renda_auditmanager.[EM Level], renda_auditmanager.HX, renda_auditmanager.EX, renda_auditmanager.MDM, renda_auditmanager.[Level +/- _Difference], renda_auditmanager.[Reported ICD], renda_auditmanager.[Audited ICD], renda_auditmanager.[ICD-10 Clinical_Documentation], renda_auditmanager.[Correct EM], renda_auditmanager.[Overcoded EM], renda_auditmanager.[Undercoded em], renda_auditmanager.[Correct Procedures], renda_auditmanager.[Incorrect Procedures], renda_auditmanager.[Additional Procedures], renda_auditmanager.[Correct ICD], renda_auditmanager.[Incorrect ICD], renda_auditmanager.[Additional ICD], renda_auditmanager.[Supports ICD10], renda_auditmanager.[Does not Support ICD], renda_auditmanager.Comments, renda_auditmanager.[Additional Data], renda_auditmanager.Payer, renda_auditmanager.POS, renda_auditmanager.Facility, renda_auditmanager.[Non Facility], renda_auditmanager.[Value of Reported wRVU], renda_auditmanager.[Value of Audited wRVU], renda_auditmanager.[Difference (wRVU)], renda_auditmanager.[Value of Reported Total RVU], renda_auditmanager.[Value of Audited Total RVU], renda_auditmanager.[Difference (Total RVU)], renda_auditmanager.[Value of Reported Total $], renda_auditmanager.[Value of Audited Total $], renda_auditmanager.[Variance (dollars)]
+	FROM renda_auditmanager WHERE NPI is not null
+
+
+	UNION ALL
+
+	SELECT sherrard_auditmanager.[Audit ID], sherrard_auditmanager.NPI, sherrard_auditmanager.[Provider Last_Name], sherrard_auditmanager.Provider_First_Name, sherrard_auditmanager.Region, sherrard_auditmanager.Practice, sherrard_auditmanager.Specialty, sherrard_auditmanager.[Patient Name], sherrard_auditmanager.[Patient ID], sherrard_auditmanager.DOS, sherrard_auditmanager.[Completed Date], sherrard_auditmanager.[Reported CPT], sherrard_auditmanager.[Audited CPT], sherrard_auditmanager.[EM Level], sherrard_auditmanager.HX, sherrard_auditmanager.EX, sherrard_auditmanager.MDM, sherrard_auditmanager.[Level +/- _Difference], sherrard_auditmanager.[Reported ICD], sherrard_auditmanager.[Audited ICD], sherrard_auditmanager.[ICD-10 Clinical_Documentation], sherrard_auditmanager.[Correct EM], sherrard_auditmanager.[Overcoded EM], sherrard_auditmanager.[Undercoded em], sherrard_auditmanager.[Correct Procedures], sherrard_auditmanager.[Incorrect Procedures], sherrard_auditmanager.[Additional Procedures], sherrard_auditmanager.[Correct ICD], sherrard_auditmanager.[Incorrect ICD], sherrard_auditmanager.[Additional ICD], sherrard_auditmanager.[Supports ICD10], sherrard_auditmanager.[Does not Support ICD], sherrard_auditmanager.Comments, sherrard_auditmanager.[Additional Data], sherrard_auditmanager.Payer, sherrard_auditmanager.POS, sherrard_auditmanager.Facility, sherrard_auditmanager.[Non Facility], sherrard_auditmanager.[Value of Reported wRVU], sherrard_auditmanager.[Value of Audited wRVU], sherrard_auditmanager.[Difference (wRVU)], sherrard_auditmanager.[Value of Reported Total RVU], sherrard_auditmanager.[Value of Audited Total RVU], sherrard_auditmanager.[Difference (Total RVU)], sherrard_auditmanager.[Value of Reported Total $], sherrard_auditmanager.[Value of Audited Total $], sherrard_auditmanager.[Variance (dollars)]
+	FROM sherrard_auditmanager WHERE NPI is not null
+
+	UNION ALL
+
+	SELECT son_auditmanager.[Audit ID], son_auditmanager.NPI, son_auditmanager.[Provider Last_Name], son_auditmanager.Provider_First_Name, son_auditmanager.Region, son_auditmanager.Practice, son_auditmanager.Specialty, son_auditmanager.[Patient Name], son_auditmanager.[Patient ID], son_auditmanager.DOS, son_auditmanager.[Completed Date], son_auditmanager.[Reported CPT], son_auditmanager.[Audited CPT], son_auditmanager.[EM Level], son_auditmanager.HX, son_auditmanager.EX, son_auditmanager.MDM, son_auditmanager.[Level +/- _Difference], son_auditmanager.[Reported ICD], son_auditmanager.[Audited ICD], son_auditmanager.[ICD-10 Clinical_Documentation], son_auditmanager.[Correct EM], son_auditmanager.[Overcoded EM], son_auditmanager.[Undercoded em], son_auditmanager.[Correct Procedures], son_auditmanager.[Incorrect Procedures], son_auditmanager.[Additional Procedures], son_auditmanager.[Correct ICD], son_auditmanager.[Incorrect ICD], son_auditmanager.[Additional ICD], son_auditmanager.[Supports ICD10], son_auditmanager.[Does not Support ICD], son_auditmanager.Comments, son_auditmanager.[Additional Data], son_auditmanager.Payer, son_auditmanager.POS, son_auditmanager.Facility, son_auditmanager.[Non Facility], son_auditmanager.[Value of Reported wRVU], son_auditmanager.[Value of Audited wRVU], son_auditmanager.[Difference (wRVU)], son_auditmanager.[Value of Reported Total RVU], son_auditmanager.[Value of Audited Total RVU], son_auditmanager.[Difference (Total RVU)], son_auditmanager.[Value of Reported Total $], son_auditmanager.[Value of Audited Total $], son_auditmanager.[Variance (dollars)]
+	FROM son_auditmanager WHERE NPI is not null
+
+	UNION ALL
+
+	SELECT storie_auditmanager.[Audit ID], storie_auditmanager.NPI, storie_auditmanager.[Provider Last_Name], storie_auditmanager.Provider_First_Name, storie_auditmanager.Region, storie_auditmanager.Practice, storie_auditmanager.Specialty, storie_auditmanager.[Patient Name], storie_auditmanager.[Patient ID], storie_auditmanager.DOS, storie_auditmanager.[Completed Date], storie_auditmanager.[Reported CPT], storie_auditmanager.[Audited CPT], storie_auditmanager.[EM Level], storie_auditmanager.HX, storie_auditmanager.EX, storie_auditmanager.MDM, storie_auditmanager.[Level +/- _Difference], storie_auditmanager.[Reported ICD], storie_auditmanager.[Audited ICD], storie_auditmanager.[ICD-10 Clinical_Documentation], storie_auditmanager.[Correct EM], storie_auditmanager.[Overcoded EM], storie_auditmanager.[Undercoded em], storie_auditmanager.[Correct Procedures], storie_auditmanager.[Incorrect Procedures], storie_auditmanager.[Additional Procedures], storie_auditmanager.[Correct ICD], storie_auditmanager.[Incorrect ICD], storie_auditmanager.[Additional ICD], storie_auditmanager.[Supports ICD10], storie_auditmanager.[Does not Support ICD], storie_auditmanager.Comments, storie_auditmanager.[Additional Data], storie_auditmanager.Payer, storie_auditmanager.POS, storie_auditmanager.Facility, storie_auditmanager.[Non Facility], storie_auditmanager.[Value of Reported wRVU], storie_auditmanager.[Value of Audited wRVU], storie_auditmanager.[Difference (wRVU)], storie_auditmanager.[Value of Reported Total RVU], storie_auditmanager.[Value of Audited Total RVU], storie_auditmanager.[Difference (Total RVU)], storie_auditmanager.[Value of Reported Total $], storie_auditmanager.[Value of Audited Total $], storie_auditmanager.[Variance (dollars)]
+	FROM storie_auditmanager WHERE NPI is not null
+
+	UNION ALL
+
+	SELECT walters_auditmanager.[Audit ID], walters_auditmanager.NPI, walters_auditmanager.[Provider Last_Name], walters_auditmanager.Provider_First_Name, walters_auditmanager.Region, walters_auditmanager.Practice, walters_auditmanager.Specialty, walters_auditmanager.[Patient Name], walters_auditmanager.[Patient ID], walters_auditmanager.DOS, walters_auditmanager.[Completed Date], walters_auditmanager.[Reported CPT], walters_auditmanager.[Audited CPT], walters_auditmanager.[EM Level], walters_auditmanager.HX, walters_auditmanager.EX, walters_auditmanager.MDM, walters_auditmanager.[Level +/- _Difference], walters_auditmanager.[Reported ICD], walters_auditmanager.[Audited ICD], walters_auditmanager.[ICD-10 Clinical_Documentation], walters_auditmanager.[Correct EM], walters_auditmanager.[Overcoded EM], walters_auditmanager.[Undercoded em], walters_auditmanager.[Correct Procedures], walters_auditmanager.[Incorrect Procedures], walters_auditmanager.[Additional Procedures], walters_auditmanager.[Correct ICD], walters_auditmanager.[Incorrect ICD], walters_auditmanager.[Additional ICD], walters_auditmanager.[Supports ICD10], walters_auditmanager.[Does not Support ICD], walters_auditmanager.Comments, walters_auditmanager.[Additional Data], walters_auditmanager.Payer, walters_auditmanager.POS, walters_auditmanager.Facility, walters_auditmanager.[Non Facility], walters_auditmanager.[Value of Reported wRVU], walters_auditmanager.[Value of Audited wRVU], walters_auditmanager.[Difference (wRVU)], walters_auditmanager.[Value of Reported Total RVU], walters_auditmanager.[Value of Audited Total RVU], walters_auditmanager.[Difference (Total RVU)], walters_auditmanager.[Value of Reported Total $], walters_auditmanager.[Value of Audited Total $], walters_auditmanager.[Variance (dollars)]
+	FROM walters_auditmanager WHERE NPI is not null
+	
+	UNION ALL
+	
+	SELECT osbun_auditmanager.[Audit ID], osbun_auditmanager.NPI, osbun_auditmanager.[Provider Last_Name], osbun_auditmanager.Provider_First_Name, osbun_auditmanager.Region, osbun_auditmanager.Practice, osbun_auditmanager.Specialty, osbun_auditmanager.[Patient Name], osbun_auditmanager.[Patient ID], osbun_auditmanager.DOS, osbun_auditmanager.[Completed Date], osbun_auditmanager.[Reported CPT], osbun_auditmanager.[Audited CPT], osbun_auditmanager.[EM Level], osbun_auditmanager.HX, osbun_auditmanager.EX, osbun_auditmanager.MDM, osbun_auditmanager.[Level +/- _Difference], osbun_auditmanager.[Reported ICD], osbun_auditmanager.[Audited ICD], osbun_auditmanager.[ICD-10 Clinical_Documentation], osbun_auditmanager.[Correct EM], osbun_auditmanager.[Overcoded EM], osbun_auditmanager.[Undercoded em], osbun_auditmanager.[Correct Procedures], osbun_auditmanager.[Incorrect Procedures], osbun_auditmanager.[Additional Procedures], osbun_auditmanager.[Correct ICD], osbun_auditmanager.[Incorrect ICD], osbun_auditmanager.[Additional ICD], osbun_auditmanager.[Supports ICD10], osbun_auditmanager.[Does not Support ICD], osbun_auditmanager.Comments, osbun_auditmanager.[Additional Data], osbun_auditmanager.Payer, osbun_auditmanager.POS, osbun_auditmanager.Facility, osbun_auditmanager.[Non Facility], osbun_auditmanager.[Value of Reported wRVU], osbun_auditmanager.[Value of Audited wRVU], osbun_auditmanager.[Difference (wRVU)], osbun_auditmanager.[Value of Reported Total RVU], osbun_auditmanager.[Value of Audited Total RVU], osbun_auditmanager.[Difference (Total RVU)], osbun_auditmanager.[Value of Reported Total $], osbun_auditmanager.[Value of Audited Total $], osbun_auditmanager.[Variance (dollars)]
+	FROM osbun_auditmanager WHERE NPI is not null
+
+
+)  AS tmp
+WHERE tmp.[Reported CPT] is not null) as am
+LEFT JOIN provider_roster ON Val(am.NPI) = provider_roster.NPI
+	UNION ALL	
+	SELECT 	
+	intel.[Audit ID],
+	provider_roster.Provider,
+	intel.[RVU - Place of service] as [Place of Service],
+	intel.[Audit Type], 
+	intel.[Patient ID],
+	intel.[Date of Audit], 
+	intel.[Provider EM code] as [Reported Code],
+	reported.charge as [Value Reported $],
+	intel.[Audited Code] as [Audited Code], 
+	audited.charge as [Value Audited $],
+	IIF(IIF(audited.em_value = 1, 'E/M', IIF(audited.proc_value = 1, 'Procedure', null)) is null, IIF(reported.em_value = 1, 'E/M', IIF(reported.proc_value = 1, 'Procedure', null)), IIF(audited.em_value = 1, 'E/M', IIF(audited.proc_value = 1, 'Procedure', null))) as code_type
+	FROM (((SELECT tmp.[Audit ID], tmp.[Fee Schedule Name], tmp.[UserID], tmp.[Attending ProviderID], tmp.[Payor ID], tmp.[Patient Status], IIF(tmp.[RVU - Place of service] = '11', FALSE, TRUE) AS [RVU - Place of service], tmp.[Patient First Name], tmp.[Patient Last Name], tmp.[Patient Gender], tmp.[Date of Birth], tmp.[Visit date], tmp.[Date of Audit], tmp.[Audit Type], tmp.[Patient ID], tmp.[Provider EM code], tmp.[Audited Code]
+FROM (
+SELECT 
+bard_intelicode.[Audit ID], bard_intelicode.[Fee Schedule Name], bard_intelicode.UserID, bard_intelicode.[Attending ProviderID], bard_intelicode.[Payor ID], bard_intelicode.[RVU - Place of service],bard_intelicode.[Patient Status], bard_intelicode.[Patient First Name], bard_intelicode.[Patient Last Name], bard_intelicode.[Patient Gender], bard_intelicode.[Date of Birth], bard_intelicode.[Visit date], bard_intelicode.[Date of Audit], bard_intelicode.[Audit Type], bard_intelicode.[Patient ID], bard_intelicode.[Provider EM code], bard_intelicode.[Audited Code]
+FROM bard_intelicode
+UNION ALL 
+SELECT 
+brooks_intelicode.[Audit ID], brooks_intelicode.[Fee Schedule Name], brooks_intelicode.UserID, brooks_intelicode.[Attending ProviderID], brooks_intelicode.[Payor ID], brooks_intelicode.[RVU - Place of service],brooks_intelicode.[Patient Status], brooks_intelicode.[Patient First Name], brooks_intelicode.[Patient Last Name], brooks_intelicode.[Patient Gender], brooks_intelicode.[Date of Birth], brooks_intelicode.[Visit date], brooks_intelicode.[Date of Audit], brooks_intelicode.[Audit Type], 
+brooks_intelicode.[Patient ID], 
+brooks_intelicode.[Provider EM code], 
+brooks_intelicode.[Audited Code]
+FROM brooks_intelicode
+UNION ALL 
+SELECT 
+azra_intelicode.[Audit ID], 
+azra_intelicode.[Fee Schedule Name], 
+azra_intelicode.UserID, 
+azra_intelicode.[Attending ProviderID], 
+azra_intelicode.[Payor ID], 
+azra_intelicode.[RVU - Place of service],
+azra_intelicode.[Patient Status], 
+azra_intelicode.[Patient First Name], 
+azra_intelicode.[Patient Last Name], 
+azra_intelicode.[Patient Gender], 
+azra_intelicode.[Date of Birth], 
+azra_intelicode.[Visit date], 
+azra_intelicode.[Date of Audit], 
+azra_intelicode.[Audit Type], 
+azra_intelicode.[Patient ID], 
+azra_intelicode.[Provider EM code], 
+azra_intelicode.[Audited Code]
+FROM azra_intelicode
+UNION ALL 
+SELECT 
+gillum_intelicode.[Audit ID], 
+gillum_intelicode.[Fee Schedule Name], 
+gillum_intelicode.UserID, 
+gillum_intelicode.[Attending ProviderID], 
+gillum_intelicode.[Payor ID], 
+gillum_intelicode.[RVU - Place of service],
+gillum_intelicode.[Patient Status], 
+gillum_intelicode.[Patient First Name], 
+gillum_intelicode.[Patient Last Name], 
+gillum_intelicode.[Patient Gender], 
+gillum_intelicode.[Date of Birth], 
+gillum_intelicode.[Visit date], 
+gillum_intelicode.[Date of Audit], 
+gillum_intelicode.[Audit Type], 
+gillum_intelicode.[Patient ID], 
+gillum_intelicode.[Provider EM code], 
+gillum_intelicode.[Audited Code]
+FROM gillum_intelicode
+UNION ALL 
+SELECT 
+mcguire_intelicode.[Audit ID], 
+mcguire_intelicode.[Fee Schedule Name], 
+mcguire_intelicode.UserID, 
+mcguire_intelicode.[Attending ProviderID], 
+mcguire_intelicode.[Payor ID], 
+mcguire_intelicode.[RVU - Place of service],
+mcguire_intelicode.[Patient Status], 
+mcguire_intelicode.[Patient First Name], 
+mcguire_intelicode.[Patient Last Name], 
+mcguire_intelicode.[Patient Gender], 
+mcguire_intelicode.[Date of Birth], 
+mcguire_intelicode.[Visit date], 
+mcguire_intelicode.[Date of Audit], 
+mcguire_intelicode.[Audit Type], 
+mcguire_intelicode.[Patient ID], 
+mcguire_intelicode.[Provider EM code], 
+mcguire_intelicode.[Audited Code]
+FROM mcguire_intelicode
+UNION ALL 
+SELECT 
+hannah_intelicode.[Audit ID], 
+hannah_intelicode.[Fee Schedule Name], 
+hannah_intelicode.UserID, 
+hannah_intelicode.[Attending ProviderID], 
+hannah_intelicode.[Payor ID], 
+hannah_intelicode.[RVU - Place of service],
+hannah_intelicode.[Patient Status], 
+hannah_intelicode.[Patient First Name], 
+hannah_intelicode.[Patient Last Name], 
+hannah_intelicode.[Patient Gender], 
+hannah_intelicode.[Date of Birth], 
+hannah_intelicode.[Visit date], 
+hannah_intelicode.[Date of Audit], 
+hannah_intelicode.[Audit Type], 
+hannah_intelicode.[Patient ID], 
+hannah_intelicode.[Provider EM code], 
+hannah_intelicode.[Audited Code]
+FROM hannah_intelicode
+UNION ALL 
+SELECT 
+osbun_intelicode.[Audit ID], 
+osbun_intelicode.[Fee Schedule Name], 
+osbun_intelicode.UserID, 
+osbun_intelicode.[Attending ProviderID], 
+osbun_intelicode.[Payor ID], 
+osbun_intelicode.[RVU - Place of service],
+osbun_intelicode.[Patient Status], 
+osbun_intelicode.[Patient First Name], 
+osbun_intelicode.[Patient Last Name], 
+osbun_intelicode.[Patient Gender], 
+osbun_intelicode.[Date of Birth], 
+osbun_intelicode.[Visit date], 
+osbun_intelicode.[Date of Audit], 
+osbun_intelicode.[Audit Type], 
+osbun_intelicode.[Patient ID], 
+osbun_intelicode.[Provider EM code], 
+osbun_intelicode.[Audited Code]
+FROM osbun_intelicode
+UNION ALL 
+SELECT 
+perkins_intelicode.[Audit ID], 
+perkins_intelicode.[Fee Schedule Name], 
+perkins_intelicode.UserID, 
+perkins_intelicode.[Attending ProviderID], 
+perkins_intelicode.[Payor ID], 
+perkins_intelicode.[RVU - Place of service],
+perkins_intelicode.[Patient Status], 
+perkins_intelicode.[Patient First Name], 
+perkins_intelicode.[Patient Last Name], 
+perkins_intelicode.[Patient Gender], 
+perkins_intelicode.[Date of Birth], 
+perkins_intelicode.[Visit date], 
+perkins_intelicode.[Date of Audit], 
+perkins_intelicode.[Audit Type], 
+perkins_intelicode.[Patient ID], 
+perkins_intelicode.[Provider EM code], 
+perkins_intelicode.[Audited Code]
+FROM perkins_intelicode
+UNION ALL 
+SELECT 
+pruitt_intelicode.[Audit ID], 
+pruitt_intelicode.[Fee Schedule Name], 
+pruitt_intelicode.UserID, 
+pruitt_intelicode.[Attending ProviderID], 
+pruitt_intelicode.[Payor ID], 
+pruitt_intelicode.[RVU - Place of service],
+pruitt_intelicode.[Patient Status], 
+pruitt_intelicode.[Patient First Name], 
+pruitt_intelicode.[Patient Last Name], 
+pruitt_intelicode.[Patient Gender], 
+pruitt_intelicode.[Date of Birth], 
+pruitt_intelicode.[Visit date], 
+pruitt_intelicode.[Date of Audit], 
+pruitt_intelicode.[Audit Type], 
+pruitt_intelicode.[Patient ID], 
+pruitt_intelicode.[Provider EM code], 
+pruitt_intelicode.[Audited Code]
+FROM pruitt_intelicode
+UNION ALL 
+SELECT 
+renda_intelicode.[Audit ID], 
+renda_intelicode.[Fee Schedule Name], 
+renda_intelicode.UserID, 
+renda_intelicode.[Attending ProviderID], 
+renda_intelicode.[Payor ID], 
+renda_intelicode.[RVU - Place of service],
+renda_intelicode.[Patient Status], 
+renda_intelicode.[Patient First Name], 
+renda_intelicode.[Patient Last Name], 
+renda_intelicode.[Patient Gender], 
+renda_intelicode.[Date of Birth], 
+renda_intelicode.[Visit date], 
+renda_intelicode.[Date of Audit], 
+renda_intelicode.[Audit Type], 
+renda_intelicode.[Patient ID], 
+renda_intelicode.[Provider EM code], 
+renda_intelicode.[Audited Code]
+FROM renda_intelicode
+UNION ALL 
+SELECT 
+sherrard_intelicode.[Audit ID], 
+sherrard_intelicode.[Fee Schedule Name], 
+sherrard_intelicode.UserID, 
+sherrard_intelicode.[Attending ProviderID], 
+sherrard_intelicode.[Payor ID], 
+sherrard_intelicode.[RVU - Place of service],
+sherrard_intelicode.[Patient Status], 
+sherrard_intelicode.[Patient First Name], 
+sherrard_intelicode.[Patient Last Name], 
+sherrard_intelicode.[Patient Gender], 
+sherrard_intelicode.[Date of Birth], 
+sherrard_intelicode.[Visit date], 
+sherrard_intelicode.[Date of Audit], 
+sherrard_intelicode.[Audit Type], 
+sherrard_intelicode.[Patient ID], 
+sherrard_intelicode.[Provider EM code], 
+sherrard_intelicode.[Audited Code]
+FROM sherrard_intelicode
+UNION ALL 
+SELECT 
+son_intelicode.[Audit ID], 
+son_intelicode.[Fee Schedule Name], 
+son_intelicode.UserID, 
+son_intelicode.[Attending ProviderID], 
+son_intelicode.[Payor ID], 
+son_intelicode.[RVU - Place of service],
+son_intelicode.[Patient Status], 
+son_intelicode.[Patient First Name], 
+son_intelicode.[Patient Last Name], 
+son_intelicode.[Patient Gender], 
+son_intelicode.[Date of Birth], 
+son_intelicode.[Visit date], 
+son_intelicode.[Date of Audit], 
+son_intelicode.[Audit Type], 
+son_intelicode.[Patient ID], 
+son_intelicode.[Provider EM code], 
+son_intelicode.[Audited Code]
+FROM son_intelicode
+UNION ALL 
+SELECT 
+storie_intelicode.[Audit ID], 
+storie_intelicode.[Fee Schedule Name], 
+storie_intelicode.UserID, 
+storie_intelicode.[Attending ProviderID], 
+storie_intelicode.[Payor ID], 
+storie_intelicode.[RVU - Place of service],
+storie_intelicode.[Patient Status], 
+storie_intelicode.[Patient First Name], 
+storie_intelicode.[Patient Last Name], 
+storie_intelicode.[Patient Gender], 
+storie_intelicode.[Date of Birth], 
+storie_intelicode.[Visit date], 
+storie_intelicode.[Date of Audit], 
+storie_intelicode.[Audit Type], 
+storie_intelicode.[Patient ID], 
+storie_intelicode.[Provider EM code], 
+storie_intelicode.[Audited Code]
+FROM storie_intelicode
+UNION ALL 
+SELECT 
+thomas_intelicode.[Audit ID], 
+thomas_intelicode.[Fee Schedule Name], 
+thomas_intelicode.UserID, 
+thomas_intelicode.[Attending ProviderID], 
+thomas_intelicode.[Payor ID], 
+thomas_intelicode.[RVU - Place of service],
+thomas_intelicode.[Patient Status], 
+thomas_intelicode.[Patient First Name], 
+thomas_intelicode.[Patient Last Name], 
+thomas_intelicode.[Patient Gender], 
+thomas_intelicode.[Date of Birth], 
+thomas_intelicode.[Visit date], 
+thomas_intelicode.[Date of Audit], 
+thomas_intelicode.[Audit Type], 
+thomas_intelicode.[Patient ID], 
+thomas_intelicode.[Provider EM code], 
+thomas_intelicode.[Audited Code]
+FROM thomas_intelicode
+UNION ALL 
+SELECT 
+walters_intelicode.[Audit ID], 
+walters_intelicode.[Fee Schedule Name], 
+walters_intelicode.UserID, 
+walters_intelicode.[Attending ProviderID], 
+walters_intelicode.[Payor ID], 
+walters_intelicode.[RVU - Place of service],
+walters_intelicode.[Patient Status], 
+walters_intelicode.[Patient First Name], 
+walters_intelicode.[Patient Last Name], 
+walters_intelicode.[Patient Gender], 
+walters_intelicode.[Date of Birth], 
+walters_intelicode.[Visit date], 
+walters_intelicode.[Date of Audit], 
+walters_intelicode.[Audit Type], 
+walters_intelicode.[Patient ID], 
+walters_intelicode.[Provider EM code], 
+walters_intelicode.[Audited Code]
+FROM walters_intelicode
+)  AS tmp
+WHERE tmp.[Attending ProviderID] is not null) as intel 
+	LEFT JOIN 
+		(SELECT DISTINCT
+		tmp.[Audit ID],
+		tmp.[Attending ProviderID],
+		tmp.Provider,
+		'' as [Audit Type],
+		tmp.[Date of Audit],
+		tmp.[Patient ID],
+		tmp.[Provider EM code],
+		tmp.[Audited Code],
+		IIF(fee_schedule.code_type = 'E/M', 1, 0) as em_value,
+		IIF(fee_schedule.code_type = 'Procedure', 1, 0) as proc_value,
+		fee_schedule.charge as charge
+		FROM 
+			(SELECT DISTINCT 
+			intel.[Audit ID], 
+			intel.[Attending ProviderID], 
+			provider_roster.Provider, 
+			provider_roster.State,
+			intel.[RVU - Place of service],
+			intel.[Patient ID], 
+			intel.[Provider EM code], 
+			intel.[Audited Code],
+			intel.[Date of Audit]
+			FROM (SELECT tmp.[Audit ID], tmp.[Fee Schedule Name], tmp.[UserID], tmp.[Attending ProviderID], tmp.[Payor ID], tmp.[Patient Status], IIF(tmp.[RVU - Place of service] = '11', FALSE, IIF(tmp.[RVU - Place of service] = '21', FALSE, TRUE)) AS [RVU - Place of service], tmp.[Patient First Name], tmp.[Patient Last Name], tmp.[Patient Gender], tmp.[Date of Birth], tmp.[Visit date], tmp.[Date of Audit], tmp.[Audit Type], tmp.[Patient ID], tmp.[Provider EM code], tmp.[Audited Code]
+				FROM (SELECT 
+bard_intelicode.[Audit ID], 
+bard_intelicode.[Fee Schedule Name], 
+bard_intelicode.UserID, 
+bard_intelicode.[Attending ProviderID], 
+bard_intelicode.[Payor ID], 
+bard_intelicode.[RVU - Place of service],
+bard_intelicode.[Patient Status], 
+bard_intelicode.[Patient First Name], 
+bard_intelicode.[Patient Last Name], 
+bard_intelicode.[Patient Gender], 
+bard_intelicode.[Date of Birth], 
+bard_intelicode.[Visit date], 
+bard_intelicode.[Date of Audit], 
+bard_intelicode.[Audit Type], 
+bard_intelicode.[Patient ID], 
+bard_intelicode.[Provider EM code], 
+bard_intelicode.[Audited Code]
+FROM bard_intelicode
+UNION ALL 
+SELECT 
+brooks_intelicode.[Audit ID], 
+brooks_intelicode.[Fee Schedule Name], 
+brooks_intelicode.UserID, 
+brooks_intelicode.[Attending ProviderID], 
+brooks_intelicode.[Payor ID], 
+brooks_intelicode.[RVU - Place of service],
+brooks_intelicode.[Patient Status], 
+brooks_intelicode.[Patient First Name], 
+brooks_intelicode.[Patient Last Name], 
+brooks_intelicode.[Patient Gender], 
+brooks_intelicode.[Date of Birth], 
+brooks_intelicode.[Visit date], 
+brooks_intelicode.[Date of Audit], 
+brooks_intelicode.[Audit Type], 
+brooks_intelicode.[Patient ID], 
+brooks_intelicode.[Provider EM code], 
+brooks_intelicode.[Audited Code]
+FROM brooks_intelicode
+UNION ALL 
+SELECT 
+azra_intelicode.[Audit ID], 
+azra_intelicode.[Fee Schedule Name], 
+azra_intelicode.UserID, 
+azra_intelicode.[Attending ProviderID], 
+azra_intelicode.[Payor ID], 
+azra_intelicode.[RVU - Place of service],
+azra_intelicode.[Patient Status], 
+azra_intelicode.[Patient First Name], 
+azra_intelicode.[Patient Last Name], 
+azra_intelicode.[Patient Gender], 
+azra_intelicode.[Date of Birth], 
+azra_intelicode.[Visit date], 
+azra_intelicode.[Date of Audit], 
+azra_intelicode.[Audit Type], 
+azra_intelicode.[Patient ID], 
+azra_intelicode.[Provider EM code], 
+azra_intelicode.[Audited Code]
+FROM azra_intelicode
+UNION ALL 
+SELECT 
+gillum_intelicode.[Audit ID], 
+gillum_intelicode.[Fee Schedule Name], 
+gillum_intelicode.UserID, 
+gillum_intelicode.[Attending ProviderID], 
+gillum_intelicode.[Payor ID], 
+gillum_intelicode.[RVU - Place of service],
+gillum_intelicode.[Patient Status], 
+gillum_intelicode.[Patient First Name], 
+gillum_intelicode.[Patient Last Name], 
+gillum_intelicode.[Patient Gender], 
+gillum_intelicode.[Date of Birth], 
+gillum_intelicode.[Visit date], 
+gillum_intelicode.[Date of Audit], 
+gillum_intelicode.[Audit Type], 
+gillum_intelicode.[Patient ID], 
+gillum_intelicode.[Provider EM code], 
+gillum_intelicode.[Audited Code]
+FROM gillum_intelicode
+UNION ALL 
+SELECT 
+mcguire_intelicode.[Audit ID], 
+mcguire_intelicode.[Fee Schedule Name], 
+mcguire_intelicode.UserID, 
+mcguire_intelicode.[Attending ProviderID], 
+mcguire_intelicode.[Payor ID], 
+mcguire_intelicode.[RVU - Place of service],
+mcguire_intelicode.[Patient Status], 
+mcguire_intelicode.[Patient First Name], 
+mcguire_intelicode.[Patient Last Name], 
+mcguire_intelicode.[Patient Gender], 
+mcguire_intelicode.[Date of Birth], 
+mcguire_intelicode.[Visit date], 
+mcguire_intelicode.[Date of Audit], 
+mcguire_intelicode.[Audit Type], 
+mcguire_intelicode.[Patient ID], 
+mcguire_intelicode.[Provider EM code], 
+mcguire_intelicode.[Audited Code]
+FROM mcguire_intelicode
+UNION ALL 
+SELECT 
+hannah_intelicode.[Audit ID], 
+hannah_intelicode.[Fee Schedule Name], 
+hannah_intelicode.UserID, 
+hannah_intelicode.[Attending ProviderID], 
+hannah_intelicode.[Payor ID], 
+hannah_intelicode.[RVU - Place of service],
+hannah_intelicode.[Patient Status], 
+hannah_intelicode.[Patient First Name], 
+hannah_intelicode.[Patient Last Name], 
+hannah_intelicode.[Patient Gender], 
+hannah_intelicode.[Date of Birth], 
+hannah_intelicode.[Visit date], 
+hannah_intelicode.[Date of Audit], 
+hannah_intelicode.[Audit Type], 
+hannah_intelicode.[Patient ID], 
+hannah_intelicode.[Provider EM code], 
+hannah_intelicode.[Audited Code]
+FROM hannah_intelicode
+
+UNION ALL 
+
+SELECT 
+osbun_intelicode.[Audit ID], 
+osbun_intelicode.[Fee Schedule Name], 
+osbun_intelicode.UserID, 
+osbun_intelicode.[Attending ProviderID], 
+osbun_intelicode.[Payor ID], 
+osbun_intelicode.[RVU - Place of service],
+osbun_intelicode.[Patient Status], 
+osbun_intelicode.[Patient First Name], 
+osbun_intelicode.[Patient Last Name], 
+osbun_intelicode.[Patient Gender], 
+osbun_intelicode.[Date of Birth], 
+osbun_intelicode.[Visit date], 
+osbun_intelicode.[Date of Audit], 
+osbun_intelicode.[Audit Type], 
+osbun_intelicode.[Patient ID], 
+osbun_intelicode.[Provider EM code], 
+osbun_intelicode.[Audited Code]
+FROM osbun_intelicode
+
+UNION ALL 
+
+SELECT 
+perkins_intelicode.[Audit ID], 
+perkins_intelicode.[Fee Schedule Name], 
+perkins_intelicode.UserID, 
+perkins_intelicode.[Attending ProviderID], 
+perkins_intelicode.[Payor ID], 
+perkins_intelicode.[RVU - Place of service],
+perkins_intelicode.[Patient Status], 
+perkins_intelicode.[Patient First Name], 
+perkins_intelicode.[Patient Last Name], 
+perkins_intelicode.[Patient Gender], 
+perkins_intelicode.[Date of Birth], 
+perkins_intelicode.[Visit date], 
+perkins_intelicode.[Date of Audit], 
+perkins_intelicode.[Audit Type], 
+perkins_intelicode.[Patient ID], 
+perkins_intelicode.[Provider EM code], 
+perkins_intelicode.[Audited Code]
+FROM perkins_intelicode
+
+UNION ALL  
+
+SELECT 
+sherrard_intelicode.[Audit ID], 
+sherrard_intelicode.[Fee Schedule Name], 
+sherrard_intelicode.UserID, 
+sherrard_intelicode.[Attending ProviderID], 
+sherrard_intelicode.[Payor ID], 
+sherrard_intelicode.[RVU - Place of service],
+sherrard_intelicode.[Patient Status], 
+sherrard_intelicode.[Patient First Name], 
+sherrard_intelicode.[Patient Last Name], 
+sherrard_intelicode.[Patient Gender], 
+sherrard_intelicode.[Date of Birth], 
+sherrard_intelicode.[Visit date], 
+sherrard_intelicode.[Date of Audit], 
+sherrard_intelicode.[Audit Type], 
+sherrard_intelicode.[Patient ID], 
+sherrard_intelicode.[Provider EM code], 
+sherrard_intelicode.[Audited Code]
+FROM sherrard_intelicode
+
+UNION ALL 
+
+SELECT 
+son_intelicode.[Audit ID], 
+son_intelicode.[Fee Schedule Name], 
+son_intelicode.UserID, 
+son_intelicode.[Attending ProviderID], 
+son_intelicode.[Payor ID], 
+son_intelicode.[RVU - Place of service],
+son_intelicode.[Patient Status], 
+son_intelicode.[Patient First Name], 
+son_intelicode.[Patient Last Name], 
+son_intelicode.[Patient Gender], 
+son_intelicode.[Date of Birth], 
+son_intelicode.[Visit date], 
+son_intelicode.[Date of Audit], 
+son_intelicode.[Audit Type], 
+son_intelicode.[Patient ID], 
+son_intelicode.[Provider EM code], 
+son_intelicode.[Audited Code]
+FROM son_intelicode
+
+UNION ALL 
+
+SELECT 
+storie_intelicode.[Audit ID], 
+storie_intelicode.[Fee Schedule Name], 
+storie_intelicode.UserID, 
+storie_intelicode.[Attending ProviderID], 
+storie_intelicode.[Payor ID], 
+storie_intelicode.[RVU - Place of service],
+storie_intelicode.[Patient Status], 
+storie_intelicode.[Patient First Name], 
+storie_intelicode.[Patient Last Name], 
+storie_intelicode.[Patient Gender], 
+storie_intelicode.[Date of Birth], 
+storie_intelicode.[Visit date], 
+storie_intelicode.[Date of Audit], 
+storie_intelicode.[Audit Type], 
+storie_intelicode.[Patient ID], 
+storie_intelicode.[Provider EM code], 
+storie_intelicode.[Audited Code]
+FROM storie_intelicode
+
+UNION ALL 
+
+SELECT 
+thomas_intelicode.[Audit ID], 
+thomas_intelicode.[Fee Schedule Name], 
+thomas_intelicode.UserID, 
+thomas_intelicode.[Attending ProviderID], 
+thomas_intelicode.[Payor ID], 
+thomas_intelicode.[RVU - Place of service],
+thomas_intelicode.[Patient Status], 
+thomas_intelicode.[Patient First Name], 
+thomas_intelicode.[Patient Last Name], 
+thomas_intelicode.[Patient Gender], 
+thomas_intelicode.[Date of Birth], 
+thomas_intelicode.[Visit date], 
+thomas_intelicode.[Date of Audit], 
+thomas_intelicode.[Audit Type], 
+thomas_intelicode.[Patient ID], 
+thomas_intelicode.[Provider EM code], 
+thomas_intelicode.[Audited Code]
+FROM thomas_intelicode
+
+UNION ALL 
+
+SELECT 
+walters_intelicode.[Audit ID], 
+walters_intelicode.[Fee Schedule Name], 
+walters_intelicode.UserID, 
+walters_intelicode.[Attending ProviderID], 
+walters_intelicode.[Payor ID], 
+walters_intelicode.[RVU - Place of service],
+walters_intelicode.[Patient Status], 
+walters_intelicode.[Patient First Name], 
+walters_intelicode.[Patient Last Name], 
+walters_intelicode.[Patient Gender], 
+walters_intelicode.[Date of Birth], 
+walters_intelicode.[Visit date], 
+walters_intelicode.[Date of Audit], 
+walters_intelicode.[Audit Type], 
+walters_intelicode.[Patient ID], 
+walters_intelicode.[Provider EM code], 
+walters_intelicode.[Audited Code]
+FROM walters_intelicode)  AS tmp
+				WHERE tmp.[Attending ProviderID] is not null) as intel 
+			INNER JOIN provider_roster 
+			ON Val(intel.[Attending ProviderID]) = provider_roster.NPI)
+		as tmp
+		LEFT JOIN fee_schedule ON tmp.[Provider EM code] = fee_schedule.code
+		AND tmp.[RVU - Place of service] = fee_schedule.facility
+		AND tmp.State = fee_schedule.state) 
+	as reported
+ON intel.[Audit ID] = reported.[Audit ID]
+AND intel.[Attending ProviderID] = reported.[Attending ProviderID]
+AND intel.[Patient ID] = reported.[Patient ID]
+AND intel.[Provider EM code] = reported.[Provider EM code]
+AND intel.[Audited Code] = reported.[Audited Code])
+	LEFT JOIN
+		(SELECT DISTINCT
+		tmp.[Audit ID],
+		tmp.[Attending ProviderID],
+		tmp.Provider,
+		'' as [Audit Type],
+		tmp.[Date of Audit],
+		tmp.[Patient ID],
+		tmp.[Provider EM code],
+		tmp.[Audited Code],
+		IIF(fee_schedule.code_type = 'E/M', 1, 0) as em_value,
+		IIF(fee_schedule.code_type = 'Procedure', 1, 0) as proc_value,
+		fee_schedule.charge as charge
+		FROM 
+			(SELECT DISTINCT 
+			intel.[Audit ID], 
+			intel.[Attending ProviderID], 
+			provider_roster.Provider, 
+			provider_roster.State,
+			intel.[RVU - Place of service],
+			intel.[Patient ID], 
+			intel.[Provider EM code], 
+			intel.[Audited Code],
+			intel.[Date of Audit]
+			FROM (SELECT tmp.[Audit ID], tmp.[Fee Schedule Name], tmp.[UserID], tmp.[Attending ProviderID], tmp.[Payor ID], tmp.[Patient Status], IIF(tmp.[RVU - Place of service] = '11', FALSE, IIF(tmp.[RVU - Place of service] = '21', FALSE, TRUE)) AS [RVU - Place of service], tmp.[Patient First Name], tmp.[Patient Last Name], tmp.[Patient Gender], tmp.[Date of Birth], tmp.[Visit date], tmp.[Date of Audit], tmp.[Audit Type], tmp.[Patient ID], tmp.[Provider EM code], tmp.[Audited Code]
+			FROM (SELECT 
+bard_intelicode.[Audit ID], 
+bard_intelicode.[Fee Schedule Name], 
+bard_intelicode.UserID, 
+bard_intelicode.[Attending ProviderID], 
+bard_intelicode.[Payor ID], 
+bard_intelicode.[RVU - Place of service],
+bard_intelicode.[Patient Status], 
+bard_intelicode.[Patient First Name], 
+bard_intelicode.[Patient Last Name], 
+bard_intelicode.[Patient Gender], 
+bard_intelicode.[Date of Birth], 
+bard_intelicode.[Visit date], 
+bard_intelicode.[Date of Audit], 
+bard_intelicode.[Audit Type], 
+bard_intelicode.[Patient ID], 
+bard_intelicode.[Provider EM code], 
+bard_intelicode.[Audited Code]
+FROM bard_intelicode
+
+UNION ALL 
+
+SELECT 
+brooks_intelicode.[Audit ID], 
+brooks_intelicode.[Fee Schedule Name], 
+brooks_intelicode.UserID, 
+brooks_intelicode.[Attending ProviderID], 
+brooks_intelicode.[Payor ID], 
+brooks_intelicode.[RVU - Place of service],
+brooks_intelicode.[Patient Status], 
+brooks_intelicode.[Patient First Name], 
+brooks_intelicode.[Patient Last Name], 
+brooks_intelicode.[Patient Gender], 
+brooks_intelicode.[Date of Birth], 
+brooks_intelicode.[Visit date], 
+brooks_intelicode.[Date of Audit], 
+brooks_intelicode.[Audit Type], 
+brooks_intelicode.[Patient ID], 
+brooks_intelicode.[Provider EM code], 
+brooks_intelicode.[Audited Code]
+FROM brooks_intelicode
+
+UNION ALL 
+
+SELECT 
+azra_intelicode.[Audit ID], 
+azra_intelicode.[Fee Schedule Name], 
+azra_intelicode.UserID, 
+azra_intelicode.[Attending ProviderID], 
+azra_intelicode.[Payor ID], 
+azra_intelicode.[RVU - Place of service],
+azra_intelicode.[Patient Status], 
+azra_intelicode.[Patient First Name], 
+azra_intelicode.[Patient Last Name], 
+azra_intelicode.[Patient Gender], 
+azra_intelicode.[Date of Birth], 
+azra_intelicode.[Visit date], 
+azra_intelicode.[Date of Audit], 
+azra_intelicode.[Audit Type], 
+azra_intelicode.[Patient ID], 
+azra_intelicode.[Provider EM code], 
+azra_intelicode.[Audited Code]
+FROM azra_intelicode
+
+UNION ALL 
+
+SELECT 
+gillum_intelicode.[Audit ID], 
+gillum_intelicode.[Fee Schedule Name], 
+gillum_intelicode.UserID, 
+gillum_intelicode.[Attending ProviderID], 
+gillum_intelicode.[Payor ID], 
+gillum_intelicode.[RVU - Place of service],
+gillum_intelicode.[Patient Status], 
+gillum_intelicode.[Patient First Name], 
+gillum_intelicode.[Patient Last Name], 
+gillum_intelicode.[Patient Gender], 
+gillum_intelicode.[Date of Birth], 
+gillum_intelicode.[Visit date], 
+gillum_intelicode.[Date of Audit], 
+gillum_intelicode.[Audit Type], 
+gillum_intelicode.[Patient ID], 
+gillum_intelicode.[Provider EM code], 
+gillum_intelicode.[Audited Code]
+FROM gillum_intelicode
+
+UNION ALL 
+
+SELECT 
+mcguire_intelicode.[Audit ID], 
+mcguire_intelicode.[Fee Schedule Name], 
+mcguire_intelicode.UserID, 
+mcguire_intelicode.[Attending ProviderID], 
+mcguire_intelicode.[Payor ID], 
+mcguire_intelicode.[RVU - Place of service],
+mcguire_intelicode.[Patient Status], 
+mcguire_intelicode.[Patient First Name], 
+mcguire_intelicode.[Patient Last Name], 
+mcguire_intelicode.[Patient Gender], 
+mcguire_intelicode.[Date of Birth], 
+mcguire_intelicode.[Visit date], 
+mcguire_intelicode.[Date of Audit], 
+mcguire_intelicode.[Audit Type], 
+mcguire_intelicode.[Patient ID], 
+mcguire_intelicode.[Provider EM code], 
+mcguire_intelicode.[Audited Code]
+FROM mcguire_intelicode
+
+UNION ALL 
+
+SELECT 
+hannah_intelicode.[Audit ID], 
+hannah_intelicode.[Fee Schedule Name], 
+hannah_intelicode.UserID, 
+hannah_intelicode.[Attending ProviderID], 
+hannah_intelicode.[Payor ID], 
+hannah_intelicode.[RVU - Place of service],
+hannah_intelicode.[Patient Status], 
+hannah_intelicode.[Patient First Name], 
+hannah_intelicode.[Patient Last Name], 
+hannah_intelicode.[Patient Gender], 
+hannah_intelicode.[Date of Birth], 
+hannah_intelicode.[Visit date], 
+hannah_intelicode.[Date of Audit], 
+hannah_intelicode.[Audit Type], 
+hannah_intelicode.[Patient ID], 
+hannah_intelicode.[Provider EM code], 
+hannah_intelicode.[Audited Code]
+FROM hannah_intelicode
+
+UNION ALL 
+
+SELECT 
+osbun_intelicode.[Audit ID], 
+osbun_intelicode.[Fee Schedule Name], 
+osbun_intelicode.UserID, 
+osbun_intelicode.[Attending ProviderID], 
+osbun_intelicode.[Payor ID], 
+osbun_intelicode.[RVU - Place of service],
+osbun_intelicode.[Patient Status], 
+osbun_intelicode.[Patient First Name], 
+osbun_intelicode.[Patient Last Name], 
+osbun_intelicode.[Patient Gender], 
+osbun_intelicode.[Date of Birth], 
+osbun_intelicode.[Visit date], 
+osbun_intelicode.[Date of Audit], 
+osbun_intelicode.[Audit Type], 
+osbun_intelicode.[Patient ID], 
+osbun_intelicode.[Provider EM code], 
+osbun_intelicode.[Audited Code]
+FROM osbun_intelicode
+
+UNION ALL 
+
+SELECT 
+perkins_intelicode.[Audit ID], 
+perkins_intelicode.[Fee Schedule Name], 
+perkins_intelicode.UserID, 
+perkins_intelicode.[Attending ProviderID], 
+perkins_intelicode.[Payor ID], 
+perkins_intelicode.[RVU - Place of service],
+perkins_intelicode.[Patient Status], 
+perkins_intelicode.[Patient First Name], 
+perkins_intelicode.[Patient Last Name], 
+perkins_intelicode.[Patient Gender], 
+perkins_intelicode.[Date of Birth], 
+perkins_intelicode.[Visit date], 
+perkins_intelicode.[Date of Audit], 
+perkins_intelicode.[Audit Type], 
+perkins_intelicode.[Patient ID], 
+perkins_intelicode.[Provider EM code], 
+perkins_intelicode.[Audited Code]
+FROM perkins_intelicode
+
+UNION ALL 
+
+SELECT 
+sherrard_intelicode.[Audit ID], 
+sherrard_intelicode.[Fee Schedule Name], 
+sherrard_intelicode.UserID, 
+sherrard_intelicode.[Attending ProviderID], 
+sherrard_intelicode.[Payor ID], 
+sherrard_intelicode.[RVU - Place of service],
+sherrard_intelicode.[Patient Status], 
+sherrard_intelicode.[Patient First Name], 
+sherrard_intelicode.[Patient Last Name], 
+sherrard_intelicode.[Patient Gender], 
+sherrard_intelicode.[Date of Birth], 
+sherrard_intelicode.[Visit date], 
+sherrard_intelicode.[Date of Audit], 
+sherrard_intelicode.[Audit Type], 
+sherrard_intelicode.[Patient ID], 
+sherrard_intelicode.[Provider EM code], 
+sherrard_intelicode.[Audited Code]
+FROM sherrard_intelicode
+
+UNION ALL 
+
+SELECT 
+son_intelicode.[Audit ID], 
+son_intelicode.[Fee Schedule Name], 
+son_intelicode.UserID, 
+son_intelicode.[Attending ProviderID], 
+son_intelicode.[Payor ID], 
+son_intelicode.[RVU - Place of service],
+son_intelicode.[Patient Status], 
+son_intelicode.[Patient First Name], 
+son_intelicode.[Patient Last Name], 
+son_intelicode.[Patient Gender], 
+son_intelicode.[Date of Birth], 
+son_intelicode.[Visit date], 
+son_intelicode.[Date of Audit], 
+son_intelicode.[Audit Type], 
+son_intelicode.[Patient ID], 
+son_intelicode.[Provider EM code], 
+son_intelicode.[Audited Code]
+FROM son_intelicode
+
+UNION ALL 
+
+SELECT 
+storie_intelicode.[Audit ID], 
+storie_intelicode.[Fee Schedule Name], 
+storie_intelicode.UserID, 
+storie_intelicode.[Attending ProviderID], 
+storie_intelicode.[Payor ID], 
+storie_intelicode.[RVU - Place of service],
+storie_intelicode.[Patient Status], 
+storie_intelicode.[Patient First Name], 
+storie_intelicode.[Patient Last Name], 
+storie_intelicode.[Patient Gender], 
+storie_intelicode.[Date of Birth], 
+storie_intelicode.[Visit date], 
+storie_intelicode.[Date of Audit], 
+storie_intelicode.[Audit Type], 
+storie_intelicode.[Patient ID], 
+storie_intelicode.[Provider EM code], 
+storie_intelicode.[Audited Code]
+FROM storie_intelicode
+
+UNION ALL 
+
+SELECT 
+thomas_intelicode.[Audit ID], 
+thomas_intelicode.[Fee Schedule Name], 
+thomas_intelicode.UserID, 
+thomas_intelicode.[Attending ProviderID], 
+thomas_intelicode.[Payor ID], 
+thomas_intelicode.[RVU - Place of service],
+thomas_intelicode.[Patient Status], 
+thomas_intelicode.[Patient First Name], 
+thomas_intelicode.[Patient Last Name], 
+thomas_intelicode.[Patient Gender], 
+thomas_intelicode.[Date of Birth], 
+thomas_intelicode.[Visit date], 
+thomas_intelicode.[Date of Audit], 
+thomas_intelicode.[Audit Type], 
+thomas_intelicode.[Patient ID], 
+thomas_intelicode.[Provider EM code], 
+thomas_intelicode.[Audited Code]
+FROM thomas_intelicode
+
+UNION ALL 
+
+SELECT 
+walters_intelicode.[Audit ID], 
+walters_intelicode.[Fee Schedule Name], 
+walters_intelicode.UserID, 
+walters_intelicode.[Attending ProviderID], 
+walters_intelicode.[Payor ID], 
+walters_intelicode.[RVU - Place of service],
+walters_intelicode.[Patient Status], 
+walters_intelicode.[Patient First Name], 
+walters_intelicode.[Patient Last Name], 
+walters_intelicode.[Patient Gender], 
+walters_intelicode.[Date of Birth], 
+walters_intelicode.[Visit date], 
+walters_intelicode.[Date of Audit], 
+walters_intelicode.[Audit Type], 
+walters_intelicode.[Patient ID], 
+walters_intelicode.[Provider EM code], 
+walters_intelicode.[Audited Code]
+FROM walters_intelicode)  AS tmp
+			WHERE tmp.[Attending ProviderID] is not null) as intel 
+						INNER JOIN provider_roster 
+						ON Val(intel.[Attending ProviderID]) = provider_roster.NPI)
+					as tmp
+					LEFT JOIN fee_schedule ON tmp.[Audited code] = fee_schedule.code
+					AND tmp.[RVU - Place of service] = fee_schedule.facility
+					AND tmp.State = fee_schedule.state) 
+	as audited
+ON intel.[Audit ID] = audited.[Audit ID]
+AND intel.[Attending ProviderID] = audited.[Attending ProviderID]
+AND intel.[Patient ID] = audited.[Patient ID]
+AND intel.[Provider EM code] = audited.[Provider EM code]
+AND intel.[Audited Code] = audited.[Audited Code])
+INNER JOIN provider_roster 
+ON Val(intel.[Attending ProviderID]) = provider_roster.NPI 
+WHERE intel.[Attending ProviderID] is not null)  AS tmp LEFT JOIN pending_audit_details ON (tmp.[Audit ID] = pending_audit_details.[Audit ID]) AND (tmp.Provider = pending_audit_details.Provider) AND (tmp.[Audit Type] = pending_audit_details.[Audit Type]) AND (tmp.[Patient ID] = pending_audit_details.[Patient ID]) AND (tmp.[Reported Code] = pending_audit_details.[Reported Code]) AND (tmp.[Value Reported $] = Str(pending_audit_details.[Value Reported $])) AND (tmp.[Audited Code] = pending_audit_details.[Audited Code]) AND (tmp.[Value Audited $] = Str(pending_audit_details.[Value Audited $]))) LEFT JOIN audits ON (tmp.[Audit ID] = audits.[Audit ID]) AND (tmp.Provider = audits.[Provider Name])
+WHERE pending_audit_details.[Audit ID] is NULL
+AND pending_audit_details.Provider is NULL
+AND pending_audit_details.[Audit Type] is NULL
+AND pending_audit_details.[Patient ID] is NULL
+AND pending_audit_details.[Reported Code] is NULL
+AND pending_audit_details.[Value Reported $] is NULL
+AND pending_audit_details.[Audited Code] is NULL
+AND pending_audit_details.[Value Audited $] is Null
+AND pending_audit_details.[Date of Audit] is NULL
+AND tmp.Provider NOT IN (SELECT DISTINCT audits.[Provider Name] FROM audits WHERE audits.[Audit ID] = tmp.[Audit ID] AND audits.[Audit Type] = tmp.[Audit Type] AND Format$(audits.[Date of Audit],"mmddyyyy") = Format$(tmp.[Date of Audit],"mmddyyyy"));
